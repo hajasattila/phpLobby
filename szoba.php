@@ -17,11 +17,67 @@
         </h1>
         <!-- Kilépés gomb -->
         <button class="button" onclick="confirmExitRoom()">Kilépés a szobából</button>
+        <!-- Vendég hozzáadás form -->
         <!-- Vendégek megjelenítése -->
-        <h2>Vendégek: </h2>
+        <h2>Vendégek:</h2>
         <ul id="guestList"></ul>
     </div>
     <script>
+        function addGuest() {
+            var guestNameInput = document.getElementById("guestNameInput");
+            var guestName = guestNameInput.value.trim();
+
+            if (guestName !== "") {
+                var roomCode = "<?php echo $_GET['roomCode']; ?>";
+
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "api.php", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        var response = JSON.parse(xhr.responseText);
+                        if (response.success) {
+                            guestNameInput.value = ""; // Töröljük a beviteli mező tartalmát
+                            fetchGuests(); // Frissítjük a vendéglistát
+                        } else {
+                            console.log("Hiba történt a vendég hozzáadása során.");
+                        }
+                    }
+                };
+                xhr.send(`action=addGuest&roomCode=${roomCode}&guestName=${encodeURIComponent(guestName)}`);
+            }
+        }
+
+        function fetchGuests() {
+            var roomCode = "<?php echo $_GET['roomCode']; ?>";
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", `api.php?action=getGuests&roomCode=${roomCode}`, true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var guests = JSON.parse(xhr.responseText);
+                    displayGuests(guests);
+                }
+            };
+            xhr.send();
+        }
+
+        // Vendég eltávolítása a szobából
+        function removeGuest(sessionId) {
+            var roomCode = "<?php echo $_GET['roomCode']; ?>";
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "removeGuest.php", true); // Új fájl létrehozása: removeGuest.php
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    // Sikeres eltávolítás esetén frissítsd a vendéglistát
+                    fetchGuests();
+                }
+            };
+            xhr.send(`roomCode=${roomCode}&sessionId=${sessionId}`);
+        }
+
+
         // Vendégek megjelenítése
         function displayGuests(guests) {
             var guestList = document.getElementById("guestList");
@@ -34,14 +90,19 @@
             }
         }
 
+        // Az oldal betöltésekor frissítsük a vendéglistát
+        window.onload = function () {
+            fetchGuests();
+        };
+
         function exitRoom() {
             var roomCode = "<?php echo $_GET['roomCode']; ?>";
 
             var xhr = new XMLHttpRequest();
-            xhr.open("GET", `/javajatek/deleteRoom.php?roomCode=${roomCode}`, true);
+            xhr.open("GET", `deleteRoom.php?roomCode=${roomCode}`, true);
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
-                    window.location.href = "/javajatek/index.php";
+                    window.location.href = "index.php";
                 } else if (xhr.readyState === 4) {
                     console.log("Hiba történt a szoba törlése során.");
                 }
@@ -55,6 +116,7 @@
                 exitRoom(); // Kilépés végrehajtása
             }
         }
+
     </script>
 </body>
 
