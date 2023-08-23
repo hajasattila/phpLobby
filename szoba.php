@@ -86,8 +86,15 @@
         // Az oldal betöltésekor frissítsük a vendéglistát
         window.onload = function () {
             fetchGuests();
+            setupGuestListUpdater();
+        }
 
-        };
+        // Frissítse a vendéglistát minden 3 másodpercben
+        function setupGuestListUpdater() {
+            setInterval(function () {
+                fetchGuests();
+            }, 500); // 3000 milliszekundum = 3 másodperc
+        }
 
         function exitRoom() {
             var roomCode = "<?php echo $_GET['roomCode']; ?>";
@@ -110,6 +117,10 @@
                 exitRoom(); // Kilépés végrehajtása
             }
         }
+
+
+
+
 
     </script>
 </body>
