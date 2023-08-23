@@ -14,7 +14,8 @@ $sessionId = session_id(); // Jelenlegi session azonosító
 
 <body>
     <div class="container">
-    <p>Az aktuális session azonosítója: <span id="sessionId"><?php echo $sessionId; ?></span></p>
+        <p>Az aktuális session azonosítója: <br><span id="sessionId" data-session-id="<?php echo $sessionId; ?>"></span>
+
         <h1>LOBBY</h1>
         <button class="button" onclick="createRoom()">Szoba létrehozása</button>
         <div class="input-field">
@@ -35,17 +36,18 @@ $sessionId = session_id(); // Jelenlegi session azonosító
 
             var sessionId = getSessionId(); // Lekéri a jelenlegi session azonosítót
 
-            // A kérés adatokat a testben küldjük el
             var data = `action=createRoom&sessionId=${sessionId}`;
 
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     var response = JSON.parse(xhr.responseText);
                     if (response.success) {
-                        // Mentett adatok kiírása a konzolra
                         console.log("Szoba kód: " + response.roomCode);
                         console.log("Létrehozó: " + response.roomCreator);
                         console.log("Vendégek: " + JSON.stringify(response.guests));
+
+                        // Vendég hozzáadása a szobához
+                        createGuest(response.roomCode, sessionId);
 
                         window.location.href = `szoba.php?roomCode=${response.roomCode}`;
                     } else {
@@ -53,7 +55,7 @@ $sessionId = session_id(); // Jelenlegi session azonosító
                     }
                 }
             };
-            xhr.send(data); // Elküldjük a kérést a szervernek
+            xhr.send(data);
         }
 
 
@@ -81,6 +83,7 @@ $sessionId = session_id(); // Jelenlegi session azonosító
         }
 
 
+
         function deleteRoom(roomCode) {
             var xhr = new XMLHttpRequest();
             xhr.open("GET", `deleteRoom.php?roomCode=${roomCode}`, true);
@@ -102,6 +105,7 @@ $sessionId = session_id(); // Jelenlegi session azonosító
 
         function joinRoom() {
             var roomCodeInput = document.getElementById("roomCodeInput").value;
+            var sessionId = getSessionId(); // Lekéri a jelenlegi session azonosítót
 
             // Ellenőrizzük, hogy van-e olyan szoba a Firebase-ban
             var xhr = new XMLHttpRequest();
@@ -112,6 +116,8 @@ $sessionId = session_id(); // Jelenlegi session azonosító
                     if (response.exists) {
                         // Ha létezik ilyen szoba, átirányítunk a "szoba.php" oldalra és átadjuk a "roomCode"-ot
                         window.location.href = `szoba.php?roomCode=${roomCodeInput}`;
+                        // Vendég hozzáadása a szobához
+                        createGuest(roomCodeInput, getSessionId());
                     } else {
                         // Ha nincs ilyen szoba, kiírjuk a hibaüzenetet
                         alert("Nincs ilyen szoba.");
@@ -123,11 +129,8 @@ $sessionId = session_id(); // Jelenlegi session azonosító
 
         // Session azonosító létrehozása vagy lekérése
         function getSessionId() {
-            var sessionId = sessionStorage.getItem("sessionId");
-            if (!sessionId) {
-                sessionId = generateSessionId();
-                sessionStorage.setItem("sessionId", sessionId);
-            }
+            var sessionIdElement = document.getElementById("sessionId");
+            var sessionId = sessionIdElement.getAttribute("data-session-id");
             return sessionId;
         }
 
@@ -139,6 +142,44 @@ $sessionId = session_id(); // Jelenlegi session azonosító
                 sessionId += characters.charAt(Math.floor(Math.random() * characters.length));
             }
             return sessionId;
+        }
+
+
+        function createGuest(roomCode, sessionId) {
+            var guests = {}; // Üres objektum a vendégeknek
+            guests[sessionId] = "Vendég"; // Hozzáadja az új vendéget a listához
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "api.php", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        console.log("Vendég hozzáadva: GUEST " + sessionId);
+                    } else {
+                        console.log("Hiba történt a vendég hozzáadása során.");
+                    }
+                }
+            };
+            xhr.send(`action=updateGuests&roomCode=${roomCode}&guests=${encodeURIComponent(JSON.stringify(guests))}`);
+        }
+
+        function updateGuestsList(roomCode, guests) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "api.php", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        console.log("Vendég hozzáadva: GUEST " + sessionId);
+                    } else {
+                        console.log("Hiba történt a vendég hozzáadása során.");
+                    }
+                }
+            };
+            xhr.send(`action=updateGuests&roomCode=${roomCode}&guests=${encodeURIComponent(JSON.stringify(guests))}`);
         }
 
 

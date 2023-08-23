@@ -61,38 +61,32 @@
             xhr.send();
         }
 
-        // Vendég eltávolítása a szobából
-        function removeGuest(sessionId) {
-            var roomCode = "<?php echo $_GET['roomCode']; ?>";
-
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "removeGuest.php", true); // Új fájl létrehozása: removeGuest.php
-            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    // Sikeres eltávolítás esetén frissítsd a vendéglistát
-                    fetchGuests();
-                }
-            };
-            xhr.send(`roomCode=${roomCode}&sessionId=${sessionId}`);
-        }
-
 
         // Vendégek megjelenítése
         function displayGuests(guests) {
             var guestList = document.getElementById("guestList");
             guestList.innerHTML = ""; // Töröljük a jelenlegi tartalmat
 
+            var guestNumber = 1; // Az első vendég sorszáma
+
             for (var sessionId in guests) {
                 var listItem = document.createElement("li");
-                listItem.textContent = guests[sessionId];
+                var guestName = guests[sessionId];
+
+                // Elnevezés hozzáadása a vendég nevéhez
+                var formattedGuestName = "Vendég " + guestNumber + ": " + guestName;
+
+                listItem.textContent = formattedGuestName;
                 guestList.appendChild(listItem);
+
+                guestNumber++; // Következő vendég sorszáma
             }
         }
 
         // Az oldal betöltésekor frissítsük a vendéglistát
         window.onload = function () {
             fetchGuests();
+
         };
 
         function exitRoom() {

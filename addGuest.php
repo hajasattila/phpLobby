@@ -12,7 +12,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["roomCode"]) && isset(
     $firebaseReference = $firebase_url . "rooms/" . $roomCode . "/guests/" . $sessionId . ".json";
     $ch = curl_init($firebaseReference);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($guestName));
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($guestName)); // Módosítva: vendég neve JSON kódolt formában
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_exec($ch);
     curl_close($ch);
