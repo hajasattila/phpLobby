@@ -11,7 +11,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["action"]) && $_POST["
     $createdTimestamp = date("Y-m-d H:i:s"); // Aktuális dátum és idő formátumban
     $sessionId = session_id(); // Jelenlegi session azonosító
 
-    // Vendégek adatainak inicializálása üres tömbbel
     // Vendégek adatainak inicializálása üres tömbbel, beleértve a létrehozót is
     $guests = [
         $sessionId => "Létrehozó"
@@ -83,6 +82,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["action"]) && $_POST["
     $roomCode = $_POST["roomCode"];
     $guests = json_decode($_POST["guests"], true);
 
+    // Ellenőrizd, hogy van-e már vendég a szobában, és ha van, akkor fűzd hozzá az új vendégeket
+    $existingGuests = getExistingGuests($roomCode); // Lekéri a már meglévő vendégeket
+    if ($existingGuests !== null) {
+        $guests = array_merge($existingGuests, $guests);
+    }
+
+    // Ha van már létrehozó, hagyd benne
+    if (array_key_exists("Létrehozó", $guests)) {
+        $guests["Létrehozó"] = "Létrehozó";
+    }
+
+    // Frissítsd a vendéglistát a Firebase adatbázisban
     $firebaseReference = $firebase_url . "rooms/" . $roomCode . "/guests.json";
     $ch = curl_init($firebaseReference);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
@@ -94,6 +105,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["action"]) && $_POST["
     echo json_encode(["success" => true]);
     exit;
 }
+
+// Már meglévő vendégek lekérése
+function getExistingGuests($roomCode)
+{
+    $firebaseReference = $GLOBALS["firebase_url"] . "rooms/" . $roomCode . "/guests.json"; // A vendégek helye a Firebase-ben
+    $ch = curl_init($firebaseReference);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $response = curl_exec($ch);
+    curl_close($ch);
+
+    $guests = json_decode($response, true);
+
+    return $guests;
+}
+
+// Egyéb műveletek kezelése
+echo json_encode(["error" => "Invalid request"]);
+?>
 
 
 

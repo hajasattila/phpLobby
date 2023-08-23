@@ -147,7 +147,7 @@ $sessionId = session_id(); // Jelenlegi session azonosító
 
         function createGuest(roomCode, sessionId) {
             var guests = {}; // Üres objektum a vendégeknek
-            guests[sessionId] = "Vendég"; // Hozzáadja az új vendéget a listához
+            guests[sessionId] = sessionId; // Hozzáadja az új vendéget a listához
 
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "api.php", true);
