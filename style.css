@@ -43,3 +43,13 @@ body {
   flex-grow: 1;
   margin-right: 10px;
 }
+
+#sessionId {
+  font-weight: bold;
+  font-size: 18px;
+  color: #007bff; /* Kék szín */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Árnyékolás */
+  padding: 5px 10px; /* Belső térköz */
+  display: inline-block; /* Blokk elemként kezeli a térközöket */
+  border-radius: 5px; /* Kerekített sarkok */
+}

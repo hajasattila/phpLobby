@@ -86,10 +86,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["action"]) && $_POST["
         $guests = array_merge($existingGuests, $guests);
     }
 
-    // Ha van már létrehozó, hagyd benne
-    if (array_key_exists("Létrehozó", $guests)) {
-        $guests["Létrehozó"] = "Létrehozó";
-    }
 
     // Frissítsd a vendéglistát a Firebase adatbázisban
     $firebaseReference = $firebase_url . "rooms/" . $roomCode . "/guests.json";
@@ -99,6 +95,33 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["action"]) && $_POST["
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_exec($ch);
     curl_close($ch);
+
+    // Ellenőrizze, hogy csak egy vendég van és legalább 2 percig tartózkodik a szobában
+    if (count($guests) === 1) {
+        sleep(120); // Vár 2 percet
+        $existingGuestsAfterSleep = getExistingGuests($roomCode); // Frissített vendéglista
+        if (count($existingGuestsAfterSleep) === 1) {
+            // Az adatbázisból a szoba törlése
+            $path = "rooms/" . $roomCode;
+            $firebaseUrlWithRoom = $firebase_url . $path . ".json";
+
+            $ch = curl_init($firebaseUrlWithRoom);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            $response = curl_exec($ch);
+            curl_close($ch);
+
+
+
+            if ($response === false) {
+                echo json_encode(["error" => "Hiba történt a szoba törlése során."]);
+                exit;
+            } else {
+                echo json_encode(["success" => true, "message" => "Szoba sikeresen törölve!"]);
+                exit;
+            }
+        }
+    }
 
     echo json_encode(["success" => true]);
     exit;
@@ -133,30 +156,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["action"]) && $_POST["
 }
 
 
-// SSE formátumban küldi a vendéglistát
-if ($_SERVER["REQUEST_METHOD"] === "GET" && isset($_GET["action"]) && $_GET["action"] === "streamGuests" && isset($_GET["roomCode"])) {
-    $roomCode = $_GET["roomCode"];
-
-    header("Content-Type: text/event-stream");
-    header("Cache-Control: no-cache");
-
-    while (true) {
-        // Firebase-ból való adatlekérés
-        $firebaseReference = $firebase_url . "rooms/" . $roomCode . "/guests.json";
-        $ch = curl_init($firebaseReference);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $response = curl_exec($ch);
-        curl_close($ch);
-
-        $guests = json_decode($response, true);
-
-        echo "data: " . json_encode($guests) . "\n\n";
-        flush();
-
-        // Várunk egy rövid ideig, majd frissítjük újra az adatokat
-        sleep(2);
-    }
-}
 
 // Egyéb műveletek kezelése
 echo json_encode(["error" => "Invalid request"]);

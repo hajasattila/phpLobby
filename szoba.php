@@ -8,6 +8,16 @@
         <?php echo $_GET['roomCode']; ?>
     </title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .container {
+            text-align: center;
+        }
+
+        .creator {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
 </head>
 
 <body>
@@ -63,7 +73,7 @@
 
 
         // Vendégek megjelenítése
-        function displayGuests(guests) {
+        function displayGuests(guests, roomCreatorId) {
             var guestList = document.getElementById("guestList");
             guestList.innerHTML = ""; // Töröljük a jelenlegi tartalmat
 
@@ -74,20 +84,23 @@
                 var guestName = guests[sessionId];
 
                 // Elnevezés hozzáadása a vendég nevéhez
-                var formattedGuestName = "Vendég " + guestNumber + ": " + guestName;
+                var formattedGuestName = "Vendég " + guestNumber + ": ";
 
-                listItem.textContent = formattedGuestName;
+                // Ellenőrzés, hogy a vendég a szoba létrehozója-e
+                if (sessionId === roomCreatorId) {
+                    formattedGuestName += "<span class='creator'>" + guestName + "</span>";
+                } else {
+                    formattedGuestName += guestName;
+                }
+
+                listItem.innerHTML = formattedGuestName;
                 guestList.appendChild(listItem);
 
                 guestNumber++; // Következő vendég sorszáma
             }
         }
 
-        // Az oldal betöltésekor frissítsük a vendéglistát
-        window.onload = function () {
-            fetchGuests();
-            setupGuestListUpdater();
-        }
+
 
         // Frissítse a vendéglistát minden 3 másodpercben
         function setupGuestListUpdater() {
@@ -118,6 +131,63 @@
             }
         }
 
+
+        // Az oldal betöltésekor frissítsük a vendéglistát
+        window.onload = function () {
+            fetchGuests();
+            setupGuestListUpdater();
+            startInterval(); // Indítsuk el az időzített feladatot
+        }
+
+        // Időzített feladat elindítása
+        function startInterval() {
+            setInterval(function () {
+                checkAndUpdateGuests();
+            }, 120000); // 120000 ms 2perc
+        }
+
+        // Vendégek ellenőrzése és frissítése
+        function checkAndUpdateGuests() {
+            var roomCode = "<?php echo $_GET['roomCode']; ?>";
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", `api.php?action=getGuests&roomCode=${roomCode}`, true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var guests = JSON.parse(xhr.responseText);
+                    if (guests !== null && Object.keys(guests).length === 1) {
+                        // Ellenőrizzük, hogy csak egy vendég van a szobában
+                        // Frissítsd a vendéglistát a szerverrel
+                        updateGuestsOnServer(guests);
+                        alert("A szoba törölve lett. 😞");
+                        window.location.href = "index.php"; // Átirányítás az index.php-re
+                    }
+                }
+            };
+            xhr.send();
+        }
+
+        // Vendégek frissítése a szerverrel
+        function updateGuestsOnServer(guests) {
+            var roomCode = "<?php echo $_GET['roomCode']; ?>";
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "api.php", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        // Sikeresen frissítettük a szerveren a vendéglistát
+                        // Ellenőrizzük, hogy csak egy vendég van, és ha igen, jelenítünk egy üzenetet
+                        if (Object.keys(guests).length === 1) {
+                            alert("A szoba törölve lett. 😞");
+                            window.location.href = "index.php"; // Átirányítás az index.php-re
+                        }
+                    }
+                }
+            };
+            var params = `action=updateGuests&roomCode=${roomCode}&guests=${encodeURIComponent(JSON.stringify(guests))}`;
+            xhr.send(params);
+        }
 
 
 

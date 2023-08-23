@@ -14,7 +14,7 @@ $sessionId = session_id(); // Jelenlegi session azonosító
 
 <body>
     <div class="container">
-        <p>Az aktuális session azonosítója: <br><span id="sessionId" data-session-id="<?php echo $sessionId; ?>"></span>
+        <p>Az aktuális azonosító: <br><span id="sessionId" data-session-id="<?php echo $sessionId; ?>"></span>
 
         <h1>LOBBY</h1>
         <button class="button" onclick="createRoom()">Szoba létrehozása</button>
