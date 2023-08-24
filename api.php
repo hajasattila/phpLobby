@@ -154,9 +154,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["action"]) && $_POST["
     echo json_encode(["success" => true]);
     exit;
 }
-
-
-
 // Egyéb műveletek kezelése
 echo json_encode(["error" => "Invalid request"]);
 ?>

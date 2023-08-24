@@ -1,0 +1,82 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  text-align: center;
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  margin: 0 auto;
+}
+
+.button {
+  background-color: #3498db;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover {
+  background-color: #2980b9;
+}
+
+.input-field {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.input-field input {
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  flex-grow: 1;
+  margin-right: 10px;
+}
+
+#sessionId {
+  font-weight: bold;
+  font-size: 18px;
+  color: #007bff; /* Kék szín */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Árnyékolás */
+  padding: 5px 10px; /* Belső térköz */
+  display: inline-block; /* Blokk elemként kezeli a térközöket */
+  border-radius: 5px; /* Kerekített sarkok */
+}
+
+.creatorr {
+  font-weight: bold;
+  font-size: 18px;
+  color: #c24526;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Árnyékolás */
+  padding: 5px 10px; /* Belső térköz */
+  display: inline-block; /* Blokk elemként kezeli a térközöket */
+  border-radius: 5px; /* Kerekített sarkok */
+}
+
+.creator {
+  font-weight: bold;
+  font-size: 18px;
+  color: #007bff; /* Kék szín */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Árnyékolás */
+  padding: 5px 10px; /* Belső térköz */
+  display: inline-block; /* Blokk elemként kezeli a térközöket */
+  border-radius: 5px; /* Kerekített sarkok */
+}
+
+li {
+  list-style-type: none;
+  text-align: center;
+  align-items: center;
+}

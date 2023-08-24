@@ -16,11 +16,9 @@ if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET["roomCode"])) {
     $roomCreator = $roomData["roomCreator"] ?? ""; // Szoba létrehozó session azonosítója
 
     if ($roomCreator === session_id()) {
-        // Az adatbázisból a szoba törlése
-        $path = "rooms/" . $roomCode;
-        $firebaseUrlWithRoom = $firebaseUrl . $path . ".json";
-
-        $ch = curl_init($firebaseUrlWithRoom);
+        // Távolítsuk el a szoba adatait a Firebase-ból
+        $firebaseReference = $firebaseUrl . "rooms/" . $roomCode . ".json";
+        $ch = curl_init($firebaseReference);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $response = curl_exec($ch);
@@ -29,10 +27,12 @@ if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET["roomCode"])) {
         if ($response === false) {
             echo "Hiba történt a szoba törlése során.";
         } else {
-            echo "Szoba sikeresen törölve!";
+            // Sikeres törlés esetén átirányítás az index.php-re
+            header("Location: index.php");
+            exit;
         }
     } else {
-        // Az adatbázisból eltávolítjuk az aktuális sessionID-t
+        // Az adatbázisból eltávolítjuk az aktuális sessionID-t a vendéglistából
         $firebaseReference = $firebaseUrl . "rooms/" . $roomCode . "/guests.json";
         $ch = curl_init($firebaseReference);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -57,7 +57,9 @@ if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET["roomCode"])) {
             }
         }
 
-        echo "Kiléptél a szobából. Az adatbázisból eltávolítottuk a sessionID-d.";
+        // Sikeres törlés esetén átirányítás az index.php-re
+        header("Location: index.php");
+        exit;
     }
 } else {
     echo "Helytelen kérés vagy hiányzó adat.";
