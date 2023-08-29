@@ -2,14 +2,14 @@
 function setupRoomCheckInterval() {
   setInterval(function () {
     checkRoomExistence();
-  }, 5000); // 5000 ms = 5 másodperc
+  }, 2000); // 2000 ms = 2 másodperc
 }
 
 // Szoba létezésének ellenőrzése
 function checkRoomExistence() {
   var roomCode = "<?php echo $_GET['roomCode']; ?>";
   var xhr = new XMLHttpRequest();
-  xhr.open("GET", `api.php?action=checkRoom&roomCode=${roomCode}`, true);
+  xhr.open("GET", `./API/api.php?action=checkRoom&roomCode=${roomCode}`, true);
   xhr.onreadystatechange = function () {
     if (xhr.readyState === 4 && xhr.status === 200) {
       var response = JSON.parse(xhr.responseText);

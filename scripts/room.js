@@ -3,7 +3,7 @@
 // JavaScript kód az AJAX kéréshez
 function createRoom() {
   var xhr = new XMLHttpRequest();
-  xhr.open("POST", "api.php", true);
+  xhr.open("POST", "./API/api.php", true);
   xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
   var sessionId = getSessionId(); // Lekéri a jelenlegi session azonosítót
@@ -21,7 +21,7 @@ function createRoom() {
         // Vendég hozzáadása a szobához
         createGuest(response.roomCode, sessionId);
 
-        window.location.href = `szoba.php?roomCode=${response.roomCode}`;
+        window.location.href = `./php/szoba.php?roomCode=${response.roomCode}`;
       } else {
         console.log("Hiba történt a szoba létrehozása során.");
       }
@@ -32,7 +32,7 @@ function createRoom() {
 
 function fetchRooms() {
   var xhr = new XMLHttpRequest();
-  xhr.open("GET", "api.php?action=getRooms", true);
+  xhr.open("GET", "./API/api.php?action=getRooms", true);
   xhr.onreadystatechange = function () {
     if (xhr.readyState === 4 && xhr.status === 200) {
       var rooms = JSON.parse(xhr.responseText);
@@ -55,7 +55,7 @@ function displayRooms(rooms) {
 
 function deleteRoom(roomCode) {
   var xhr = new XMLHttpRequest();
-  xhr.open("GET", `deleteRoom.php?roomCode=${roomCode}`, true);
+  xhr.open("GET", `./php/deleteRoom.php?roomCode=${roomCode}`, true);
   xhr.onreadystatechange = function () {
     if (xhr.readyState === 4 && xhr.status === 200) {
       console.log(`Szoba (${roomCode}) sikeresen törölve.`);
@@ -78,13 +78,13 @@ function joinRoom() {
 
   // Ellenőrizzük, hogy van-e olyan szoba a Firebase-ban
   var xhr = new XMLHttpRequest();
-  xhr.open("GET", `checkRoom.php?roomCode=${roomCodeInput}`, true);
+  xhr.open("GET", `./php/checkRoom.php?roomCode=${roomCodeInput}`, true);
   xhr.onreadystatechange = function () {
     if (xhr.readyState === 4 && xhr.status === 200) {
       var response = JSON.parse(xhr.responseText);
       if (response.exists) {
         // Ha létezik ilyen szoba, átirányítunk a "szoba.php" oldalra és átadjuk a "roomCode"-ot
-        window.location.href = `szoba.php?roomCode=${roomCodeInput}`;
+        window.location.href = `./php/szoba.php?roomCode=${roomCodeInput}`;
         // Vendég hozzáadása a szobához
         createGuest(roomCodeInput, getSessionId());
       } else {

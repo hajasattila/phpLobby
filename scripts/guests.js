@@ -5,7 +5,7 @@ function createGuest(roomCode, sessionId) {
   guests[sessionId] = sessionId; // Hozzáadja az új vendéget a listához
 
   var xhr = new XMLHttpRequest();
-  xhr.open("POST", "api.php", true);
+  xhr.open("POST", "./API/api.php", true);
   xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
   xhr.onreadystatechange = function () {
     if (xhr.readyState === 4 && xhr.status === 200) {
@@ -26,7 +26,7 @@ function createGuest(roomCode, sessionId) {
 
 function updateGuestsList(roomCode, guests) {
   var xhr = new XMLHttpRequest();
-  xhr.open("POST", "api.php", true);
+  xhr.open("POST", "./API/api.php", true);
   xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
   xhr.onreadystatechange = function () {
     if (xhr.readyState === 4 && xhr.status === 200) {
